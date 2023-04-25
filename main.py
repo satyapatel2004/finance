@@ -1,34 +1,29 @@
 import yfinance as yf 
 import inquirer
 from sys import exit
-import tempfile 
-import csv 
-import rich
-import pprint 
-import os 
+import pandas 
 
 
 
+#gets the stock ticker from the user: 
 def get_stock():
-    global tickr
+    global tickrInfo 
+    global tickr  
     
     try:
         tickrIn = input("enter your Ticker: ")
         tickr = yf.Ticker(tickrIn)
-        info(tickr.info)
+
+        #creates a dictionary with the ticker's information. 
+        tickrInfo = tickr.get_info() 
         analysis() 
+
          
-    except ImportError: 
+    except ValueError: 
         print("Incorrect Ticker!") 
         get_stock()
 
-stockInfoFile = tempfile.NamedTemporaryFile() 
-
-def info(tickrInfo):
-    with open(stockInfoFile.name, 'w') as f: 
-        for key in tickrInfo.keys():
-            stockInfoFile.write("%s,%s\n"%(key,tickrInfo[key]))
-
+#types of analysis the user can complete (in progress)
 def analysis():
     questions = [
         inquirer.List(
@@ -40,11 +35,10 @@ def analysis():
     answer = inquirer.prompt(questions)
 
     if answer['analysis'] == "Stock Analysis":
+        print(tickrInfo['sharesOutstanding'])
         stock_analysis()
 
 def stock_analysis():
-
-    open(stockInfoFile.name, 'r') as f
 
     questions = [
         inquirer.List(
@@ -56,34 +50,33 @@ def stock_analysis():
     answer = inquirer.prompt(questions)
 
     if answer['stockAnalysis'] == "P/B":
-        for row in f:
-            if row[0] == "priceToBook":
-                print("the price to book ratio is: " + row[1])
-
+        for key in tickrInfo:
+            if key == 'priceToBook':
+                print("the price to book ratio is " + tickrInfo[key])
     
     if answer['stockAnalysis'] == "P/E":
-        for row in f:
-            if row[0] == "sharesOutstanding":
-                outstandingShares = row[1]
+        for key in tickrInfo:
+            if key == 'sharesOutstanding':
+                outstandingShares = tickrInfo[key]
 
-            if row[0] == "grossProfits":
-                profit = row[1]
+            if key == 'grossProfits':
+                profit = tickrInfo[key]
 
-            if row[0] == "previousClose":
-                marketPrice = row[1]
+            if key == 'previousClose':
+                marketPrice = tickrInfo[key]
 
         earningsPerShare = float(outstandingShares)/float(profit) 
         print("The Price to Earnings Ratio is: " + str(float(marketPrice)/earningsPerShare))
 
     if answer['stockAnalysis'] == "PEG":
-        for row in f:
-            if row[0] == "pegRatio":
-                print("The PEG Ratio is " + row[1])
+        for key in tickrInfo:
+            if key == 'pegRatio':
+                print("The PEG Ratio is " + tickrInfo[key])
 
     if answer['stockAnalysis'] == "Dividend Yield":
-        for row in f:
-            if row[0] == "dividendYield":
-                print("the Divident Yield is " + row[1])
+        for key in tickrInfo:
+            if key == 'dividendYield':
+                print("the Divident Yield is " + tickrInfo[key])
                 
         else: print("Dividend Yield Unavailable\n")
 
@@ -97,11 +90,3 @@ def main():
 #Changes made during Cleanup
 
 main() 
-
- 
-
-
-
-
-#This is the main file 
-# something hash changed
