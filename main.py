@@ -6,8 +6,6 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 
-
-
 #gets the stock ticker from the user: 
 def get_stock():
     global tickrIn
@@ -120,4 +118,4 @@ def stock_analysis():
 def main():
     get_stock()
 
-main() 
+main()
