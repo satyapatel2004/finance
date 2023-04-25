@@ -1,12 +1,16 @@
 import yfinance as yf 
 import inquirer
 from sys import exit
-import pandas 
+import plotext
+import datetime
+from dateutil.relativedelta import relativedelta
+
 
 
 
 #gets the stock ticker from the user: 
 def get_stock():
+    global tickrIn
     global tickrInfo 
     global tickr  
     
@@ -14,12 +18,14 @@ def get_stock():
         tickrIn = input("enter your Ticker: ")
         tickr = yf.Ticker(tickrIn)
 
+        tickrIn = tickrIn.upper() 
+
         #creates a dictionary with the ticker's information. 
         tickrInfo = tickr.get_info() 
         analysis() 
 
          
-    except ValueError: 
+    except ImportError: 
         print("Incorrect Ticker!") 
         get_stock()
 
@@ -29,7 +35,7 @@ def analysis():
         inquirer.List(
             "analysis", 
             message="What type of analysis do you want to do?",
-            choices=["Stock Analysis", "Other", "Other2", "Other3"],
+            choices=["Stock Analysis", "Bar Chart", "Other2", "quit"],
         ),
     ]
     answer = inquirer.prompt(questions)
@@ -38,6 +44,34 @@ def analysis():
         print(tickrInfo['sharesOutstanding'])
         stock_analysis()
 
+
+    if answer['analysis'] == "Bar Chart":
+        barChart() 
+
+    if answer['analysis'] == "quit":
+        get_stock() 
+
+def barChart():
+
+    today = datetime.date.today() 
+    yrAgo = today - relativedelta(years=1)
+
+
+    plotext.date_form('Y/m/d')
+    end = plotext.today_datetime() 
+    data = yf.download(tickrIn, yrAgo, today)
+
+    prices = list(data["Close"])
+    dates = plotext.datetimes_to_string(data.index)
+    plotext.plot(dates, prices)
+
+    plotext.title("Stock Price")
+    plotext.xlabel("Date")
+    plotext.ylabel("Stock price")
+    plotext.show() 
+
+
+#conducts the stock analysis
 def stock_analysis():
 
     questions = [
@@ -71,7 +105,7 @@ def stock_analysis():
     if answer['stockAnalysis'] == "PEG":
         for key in tickrInfo:
             if key == 'pegRatio':
-                print("The PEG Ratio is " + tickrInfo[key])
+                print("The PEG Ratio is " + str(tickrInfo[key]))
 
     if answer['stockAnalysis'] == "Dividend Yield":
         for key in tickrInfo:
@@ -85,8 +119,5 @@ def stock_analysis():
        
 def main():
     get_stock()
-
-#Test change to see if git does anything...! 
-#Changes made during Cleanup
 
 main() 
