@@ -20,10 +20,11 @@ def get_stock():
 
         #creates a dictionary with the ticker's information. 
         tickrInfo = tickr.get_info() 
+
         analysis() 
 
          
-    except ImportError: 
+    except: 
         print("Incorrect Ticker!") 
         get_stock()
 
@@ -49,15 +50,42 @@ def analysis():
     if answer['analysis'] == "quit":
         get_stock() 
 
+
 def barChart():
+    questions = [
+        inquirer.List(
+            "barChartType", 
+            message="What type of Bar chart do you want?",
+            choices=["30 day", "6 Month", "1 Yr", "2 Yr"]
+        ),
+    ]
+    answer = inquirer.prompt(questions)
+
+    print(answer['barChartType'])
+
+    makeBarChart(answer['barChartType'])
+
+def makeBarChart(timeframe):
 
     today = datetime.date.today() 
-    yrAgo = today - relativedelta(years=1)
+    print(timeframe)
+
+    if timeframe == "1 Yr":
+        timeDelta = today - relativedelta(years=1)
+
+    if timeframe == "30 day":
+        timeDelta = today - relativedelta(days=30)
+
+    if timeframe == "6 Month":
+        timeDelta = today - relativedelta(months=6)
+
+    if timeframe == "2 Yr":
+        timeDelta = today - relativedelta(years=2)
 
 
     plotext.date_form('Y/m/d')
     end = plotext.today_datetime() 
-    data = yf.download(tickrIn, yrAgo, today)
+    data = yf.download(tickrIn, timeDelta, today)
 
     prices = list(data["Close"])
     dates = plotext.datetimes_to_string(data.index)
@@ -67,6 +95,7 @@ def barChart():
     plotext.xlabel("Date")
     plotext.ylabel("Stock price")
     plotext.show() 
+    analysis() 
 
 
 #conducts the stock analysis
