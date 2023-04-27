@@ -60,15 +60,11 @@ def barChart():
         ),
     ]
     answer = inquirer.prompt(questions)
-
-    print(answer['barChartType'])
-
     makeBarChart(answer['barChartType'])
 
 def makeBarChart(timeframe):
 
     today = datetime.date.today() 
-    print(timeframe)
 
     if timeframe == "1 Yr":
         timeDelta = today - relativedelta(years=1)
